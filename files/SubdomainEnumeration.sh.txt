@@ -1,0 +1,88 @@
+#!/bin/bash
+#-d switch for target domain input
+while getopts 'd:' option
+do
+	case "${option}" in
+		d) targetDomain=${OPTARG};;
+	esac
+done
+
+sprunjeyDir="$( cd"( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+source $sprunjeyDir/path.ini
+currentDate=$(date +"%Y-%m-%d")
+startTime=$(date)
+if [ -d ~/recon/$targetDomain ]; then
+	outputDir=~/Recon/$targetDomain/$currentDate
+else
+	outputDir=~/Recon/$targetDomain
+fi
+echo "Output directory is set to $outputDir"
+mkdir $outputDir
+cd $outputDir
+#DNS Resolvers List
+echo "Creating DNS resolvers list"
+#Curls a public resolver list and validates entries to avoid poisoned servers
+curl https://public-dns.info/nameservers-all.txt > ~/$sprunjeyDir/PublicDNS.list
+dnsvalidator -tL ~/$sprunjeyDir/PublicDNS.list -o ~/Tools/DNSResolvers.list -threads 100 --silent 1>/dev/null
+#Subdomain Enumeration
+echo "Running amass"
+amass enum -active -d $targetDomain -config $sprunjeyDir/amass.ini -o $outputDir/$targetDomain.amass -rf ~/Tools/DNSResolvers.list
+#amass can uses an adequate amount of resources. on...less well equip hosts it can fall over, just in case it fails, a file is created so the end report can provideca number instead of null.
+touch -a $outputDir/$targetDomain.amass
+echo "Running subfinder"
+subfinder -d $targetDomain -o $outputDir/$targetDomain.subfinder --all -t 20 -rL ~/Tools/DNSResolvers.list
+echo "Running sublist3r"
+sublist3r --domain $targetDomain --output $outputDir/$targetDomain.sublist3r
+echo "Running GAU"
+#On popular domains with upwards of 20,000 subdomains GAU seems to eat an immense amount of storage...Sprunjey may function better overall with this disabled in some cases.
+gau -subs $targetDomain | sort -uf | unfurl -u domains | grep $targetDomain > $outputDir/$targetDomain.gau
+#Rapid7
+#Sprunjey's initial implementation of this was functional but time and resource consuming, there are better tools for this purpose.
+touch -a $outputDir/$targetDomain.r7
+cat $outputDir/$targetDomain.subfinder >> $outputDir/$targetDomain.primary
+cat $outputDir/$targetDomain.sublist3r >> $outputDir/$targetDomain.primary
+cat $outputDir/$targetDomain.amass >> $outputDir/$targetDomain.primary
+cat $outputDir/$targetDomain.gau >> $outputDir/$targetDomain.primary
+cat $outputDir/$targetDomain.r7 >> $outputDir/$targetDomain.primary
+#Exclusions
+echo "Applying Exclusions"
+cat $outputDir/$targetDomain.primary | sort -uf | inscope > $outputDir/$targetDomain.primaryUnique
+echo "Reolving primary list"
+puredns resolve $outputDir/$targetDomain.primaryUnique -r ~/Tools/DNSResolvers.list -w $outputDir/$targetDomain.primaryResolved --bin ~/Tools/massdns/bin/massdns
+sed -i '/^*/d' $outputDir/$targetDomain.primaryResolved
+#seed for bruteforcing and creation of wordlist
+echo $targetDomain > $outputDir/$targetDomain.seed
+cp ~/Tools/Wordlists/Subdomains/all.txt $sprunjeyDir/permutationsWord.list
+cat ~/Tools/Wordlists/Subdomains/2m-subdomains.txt >> $sprunjeyDir/permutationsWord.list
+cat ~/ToolsWordlists/Subdomains/clean-jhaddix-dns.txt >> $sprunjeyDir/permutationsWord.list
+#Subdomain permutations
+altdns -i $outputDir/$targetDomain.seed -o $outputDir/$targetDomain.permutations -w $sprunjeyDir/permutationsWord.list > /dev/null 2>&1
+dnsgen $outputDir/$targetDomain.seed -w $sprunjeyDir/permutationsWord.list >> $outputDir/$targetDomain.permutations
+sed -e "s/$/\.$targetDomain" $sprunjeyDir/permutationsWord.list
+cat $sprunjeyDir/permutationsWord.list | grep -v "*" >> $outputDir/$targetDomain.permutations
+cat $outputDir/$targetDomain.permutations | sort -uf | inscope > $outputDir/$targetDomain.permutationsUnique
+echo "Bruteforcing subdomains"
+puredns resolve $outoutDir/$targetDomain.permutationsUnique -r ~/Tools/DNSResolvers.list -w $outputDir/$targetDomain.puredns --bin ~/Tools/massdns/bin/massdns
+cat $outputDir/$targetDomain.puredns >> $outputDir/$targetDomain.primaryResolved
+cat $outputDir/$targetDomain.primaryResolved | sort -uf | inscope > $outputDir/$targetDomain.primaryPreprobe
+echo "Probing primary list"
+httpx -l $outputDir/$targetDomain.primaryPreprobe -follow-redirects -o $outputDir/$targetDomain.targetsWOExclusions
+cat $outputDir/$targetDomain.targetsWOExclusions | sort -ufc| inscope > $outputDir/$targetDomain.targets
+echo "Checking if any hits are new"
+cat $outputDir/$targetDomain.targets | anew ~/Recon/$targetDomain/$targetDomain.targets > $outputDir/$targetDomain.newHosts
+#Creates a newHosts file if no new hosts are found, this allows a count to be given in report instead of null.
+touch -a $outputDir/$targetDomain.newHosts
+#scanners, nmap, subjacking, screenshotting, etc, can go here and leverage the lists created.
+#Telegram alert
+~/Tools/TBot/TBot.sh -m "$(echo "<u><b>$startTime</b></u>
+
+Amass: $(wc -l < $outputDir/$targetDomain.amass)
+Subfinder: $(wc -l < $outputDir/$targetDomain.subfinder)
+Sublist3r: $(wc -l < $outputDir/$targetDomain.sublist3r)
+GAU: $(wc -l < $outputDir/$targetDomain.gau)
+R7 FDNS: $(wc -l < $outputDir/$targetDomain.r7)
+Bruteforce: $(wc -l < $outputDir/$targetDomain.puredns)
+HTTP/S: $(wc -l < $outputDir/$targetDomain.targets)
+New: $(wc -l < $outputDir/$targetDomain.newHosts)
+
+
