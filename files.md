@@ -1,3 +1,4 @@
 ## /files
   
-[service.log](files/service.log)
+[](files/BBSetup.sh.txt)
+[](files/SubdomainEnumeration.sh.txt)
