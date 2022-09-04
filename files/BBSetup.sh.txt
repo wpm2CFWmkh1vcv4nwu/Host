@@ -1,0 +1,337 @@
+#!/bin/bash
+echo "Updating and upgrading"
+sudo apt-get -y update
+sudo apt-get -y upgrade
+echo "Installing VNC"
+#vnc
+sudo apt-get install -y xfce4 xfce4-goodies
+#select either
+sudo apt install tightvncserver
+vncserver
+#set password 8 chars
+vncserver -kill :1
+mv ~/.vnc/xstartup ~/.vnc/xstartup.bak
+#nano ~/.vnc/xstartup
+touch ~/.vnc/xstartup
+#file contents below
+echo '#!/bin/bash' >> ~/.vnc/xstartup
+echo "xrdb $HOME/.Xresources" >> ~/.vnc/xstartup
+echo "startxfce4 &" >> ~/.vnc/xstartup
+chmod +x ~/.vnc/xstartup
+vncserver -localhost
+echo "installing from apt-get"
+sudo apt-get install -y libcurl4-openssl-dev
+sudo apt-get install -y libssl-dev
+sudo apt-get install -y jq
+sudo apt-get install -y ruby-full
+sudo apt-get install -y libcurl4-openssl-dev libxml2 libxml2-dev libxslt1-dev ruby-dev build-essential libgmp-dev zlib1g-dev
+sudo apt-get install -y build-essential libssl-dev libffi-dev python-dev
+sudo apt-get install -y python-setuptools
+sudo apt-get install -y libldns-dev
+sudo apt-get install -y python3-pip
+sudo apt-get install -y python-pip
+sudo apt-get install -y python-dnspython
+sudo apt-get install -y git
+sudo apt-get install -y rename
+sudo apt-get install -y findutils
+sudo apt-get install -y burpsuite
+sudo apt-get install -y zsh
+sudo apt-get install -y tmux
+sudo apt-get install -y vim
+sudo apt-get install -y libboost-all-dev
+sudo apt-get install -y cmake
+sudo apt-get install -y python3-pycurl
+sudo apt-get install -y python3-bs4
+sudo apt-get install -y python3-geoip
+sudo apt-get install -y python3-gi
+sudo apt-get install -y python3-cairocffi
+sudo apt-get install -y python3-selenium
+sudo apt-get install -y firefoxdriver
+sudo apt-get install -y mosh
+sudo apt-get install -y nmap
+sudo apt-get install -y masscan
+sudo apt-get install -y jq
+sudo apt-get install -y nikto
+sudo apt-get install -y php
+sudo apt-get install -y php7.4-gd
+#GO Lang
+echo "Installing Go Lang"
+wget https://golang.org/dl/go1.15.6.linux-amd64.tar.gz
+sudo tar -xvf go1.15.6.linux-amd64.tar.gz
+sudo mv go /usr/local
+export GOROOT=/usr/local/go
+export GOPATH=$HOME/go
+export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+echo 'export GOROOT=/usr/local/go' >> ~/.bash_profile
+echo 'export GOPATH=$HOME/go' >> ~/.bash_profile
+echo 'export PATH=$GOPATH/bin:$GOROOT/bin:$PATH' >> ~/.bash_profile
+sleep 10
+echo "Making dirs"
+mkdir ~/Tools
+mkdir ~/Recon
+cd ~/Recon
+touch .scope
+touch targets.list
+cd ~/Tools
+#Aquatone
+echo "Installing Aquatone"
+go get github.com/michenriksen/aquatone
+#Subjack
+echo "Installing Subjack"
+go get github.com/haccer/subjack
+#Dirsearch
+echo "Installing Dirsearch"
+git clone https://github.com/maurosoria/dirsearch.git
+cd ~/Tools
+#GitGraber
+echo "Installing gitGraber"
+git clone https://github.com/hisxo/gitGraber.git
+cd gitGraber
+pip3 install -r requirements.txt
+cd ~/Tools
+#Altdns
+echo "Installing altdns"
+git clone https://github.com/infosec-au/altdns.git
+cd altdns
+sed -i -e "s/from\sQueue\simport\sQueue\sas\sQueue/from queue import Queue as Queue/g" altdns/__main__.py
+pip3 install -r requirements.txt
+python3 setup.py install
+cd ~/Tools
+#xsser
+echo "Installing xsser"
+git clone https://github.com/epsylon/xsser
+cd xsser
+python3 ./setup.py install
+cd ~/Tools
+#Subfinder
+echo "Installing Subfinder"
+git clone https://github.com/projectdiscovery/subfinder.git
+cd subfinder/v2/cmd/subfinder
+go build .
+mv subfinder /usr/local/bin/
+cd ~/Tools
+#ParamSpider
+echo "Installing ParamSpider"
+git clone https://github.com/devanshbatham/ParamSpider
+cd ParamSpider
+pip3 install -r requirements.txt
+cd ~/Tools
+#httpx
+echo "Installing httpx"
+git clone https://github.com/projectdiscovery/httpx.git; cd httpx/cmd/httpx; go build; mv httpx /usr/local/bin/; httpx -version
+cd ~/Tools
+#Sublist3r
+echo "Installing Subl1st3r"
+git clone https://github.com/aboul3la/Sublist3r.git
+cd Sublist3r
+pip3 install -r requirements.txt
+python3 setup.py install
+cd ~/Tools
+#DNSValidator
+echo "Installing DNSValidator"
+git clone https://github.com/vortexau/dnsvalidator
+cd dnsvalidator
+python3 setup.py install
+cd ~/Tools
+#MassDNS
+echo "Installing MassDNS"
+git clone https://github.com/blechschmidt/massdns.git
+cd massdns
+make
+cd ~/Tools
+#DNSGen
+echo "Installing DNSGen"
+pip3 install dnsgen
+#asnlookup
+echo "Installing asnlookup"
+git clone https://github.com/yassineaboukir/asnlookup.git
+cd asnlookup
+pip3 install -r requirements.txt
+cd ~/Tools
+#DomLink
+echo "Installing DomLink"
+git clone https://github.com/vysecurity/DomLink.git
+cd DomLink
+pip3 install -r requirements.txt
+cd ~/Tools
+#WPScan
+echo "Installing WPScan"
+git clone https://github.com/wpscanteam/wpscan.git
+cd wpscan
+sudo gem install bundler && bundle install --without test
+cd ~/Tools
+#wafw00f
+echo "Installing wafw00f"
+pip3 install wafw00f
+#WhatWeb
+echo "Installing WhatWeb"
+git clone https://github.com/urbanadventurer/WhatWeb
+cd WhatWeb
+make install
+cd ~/Tools
+#Amass
+echo "Installing Amass"
+sudo snap install amass
+export PATH=$PATH:/snap/bin
+sudo snap refresh
+curl https://raw.githubusercontent.com/OWASP/Amass/master/examples/config.ini > amass.ini
+#GoSpider
+echo "Installing GoSpider"
+go get -u github.com/jaeles-project/gospider
+#anew
+echo "Installing anew"
+go get -u github.com/tomnomnom/anew
+#httprobe
+echo "Installing httprobe"
+go get -u github.com/tomnomnom/httprobe
+#unfurl
+echo "Installing unfurl"
+go get -u github.com/tomnomnom/unfurl
+#waybackurls
+echo "Installing waybackurls"
+go get -u github.com/tomnomnom/waybackurls
+#fff
+echo "Installing fff"
+go get -u github.com/tomnomnom/fff
+#assetfinder
+echo "Installing assetfinder"
+go get -u github.com/tomnomnom/assetfinder
+#urinteresting
+echo "Installing urinteresting"
+go get -u github.com/tomnomnom/hacks/urinteresting
+#meg
+echo "Installing meg"
+go get -u github.com/tomnomnom/meg
+#gf
+echo "Installing gf"
+go get -u github.com/tomnomnom/gf
+mkdir ~/.gf
+git clone https://github.com/tomnomnom/gf
+mv gf/examples/*.json ~/.gf
+rm -r ~/Tools/gf
+git clone https://github.com/1ndianl33t/gf-patterns
+mv gf-patterns/*.json ~/.gf
+rm -r ~/Tools/gf-patterns
+#GAU
+echo "Installing GAU"
+go get -u github.com/lc/gau
+#FFUF
+echo "Installing FFUF"
+go get -u github.com/ffuf/ffuf
+#hakrawler
+echo "Installing hakrawler"
+go get -u github.com/hakluke/hakrawler
+#Nuclei
+echo "Installing Nuclei"
+cd ~/Tools
+git clone https://github.com/projectdiscovery/nuclei-templates.git
+git clone https://github.com/projectdiscovery/nuclei.git
+cd nuclei/v2/cmd/nuclei/
+go build
+mv nuclei /usr/local/bin/
+sed -i -e 's|'/root/'|/root/Tools/|g' ~/.config/nuclei/.templates-config.json
+nuclei -version
+nuclei -ut
+cd ~/Tools
+#Nikto
+echo "Installing Nikto"
+git clone https://github.com/sullo/nikto
+cd nikto/program
+chmod +x nikto.pl
+cd ~/Tools
+#JSMon
+git clone https://github.com/robre/jsmon.git
+cd jsmon
+python setup.py install
+touch .env
+echo "JSMON_NOTIFY_TELEGRAM=True
+JSMON_TELEGRAM_TOKEN=TELEGRAMTOKEN
+JSMON_TELEGRAM_CHAT_ID=CHAT_ID" >> .env
+(crontab -l 2>/deb/null; echo "@daily python jsmon.py") | crontab -
+cd ~/Tools
+#TBot
+echo "Installing TBot"
+git clone https://github.com/toklabs/TBot.git
+cd TBot/
+chmod +x TBot.sh
+cd ~/Tools
+#Byp4xx
+echo "Installing Byp4xx"
+git clone https://github.com/lobuhi/byp4xx.git
+cd byp4xx
+chmod u+x byp4xx.sh
+cd ~/Tools
+#Dalfox
+echo "Installing Dalfox"
+sudo snap install dalfox
+#scripthunter
+echo "Installing scripthunter"
+git clone https://github.com/robre/scripthunter
+#seclists
+echo "Getting Wordlists"
+#Wordlist folder structure
+mkdir ~/Tools/Wordlists
+mkdir ~/Tools/Wordlists/Directories
+mkdir ~/Tools/Wordlists/Subdomains
+mkdir ~/Tools/Wordlists/APIs
+mkdir ~/Tools/Wordlists/Technologies
+mkdir ~/Tools/Wordlists/Extensions
+mkdir ~/Tools/Wordlists/Custom
+mkdir ~/Tools/Wordlists/Payloads
+mkdir ~/Tools/Wordlists/Payloads/XSS
+mkdir ~/Tools/Wordlists/Payloads/LFI
+mkdir ~/Tools/Wordlists/Payloads/XXE
+mkdir ~/Tools/Wordlists/Payloads/SQLi
+mkdir ~/Tools/Wordlists/_Sources
+cd ~/Tools/Wordlists/_Sources
+#Assetnotes Wordlists
+echo "Getting Assetnotes Wordlists"
+wget -r --no-parent -R "index.html*" https://wordlists-cdn.assetnote.io/data/automated/ -nH
+wget -r --no-parent -R "index.html*" https://wordlists-cdn.assetnote.io/data/manual/ -nH
+wget -r --no-parent -R "index.html*" https://wordlists-cdn.assetnote.io/data/technologies/ -nH
+#seclists
+echo "Getting Seclists"
+git clone https://github.com/danielmiessler/SecLists.git
+cd ~/Tools/Wordlists/_Sources/SecLists/Discovery/DNS
+cat dns-Jhaddix.txt | head -n -14 > clean-jhaddix-dns.txt
+cd ~/Tools
+cp ~/Tools/Wordlists/_Sources/SecLists/Discovery/DNS/* ~/Tools/Wordlists/Subdomains/
+rm ~/Tools/Wordlists/Subdomains/jhaddix-dns.txt
+cp ~/Tools/Wordlists/_Sources/SecLists/Discovery/DNS/clean-jhaddix-dns.txt ~/Tools/Wordlists/Subdomains/jhaddix-dns.txt
+cp ~/Tools/Wordlists/_Sources/data/manual/2m-subdomains.txt ~/Tools/Wordlists/Subdomains/2m-subdomains.txt
+cp ~/Tools/Wordlists/_Sources/data/manual/best-dns-wordlist.txt ~/Tools/Wordlists/Subdomains/best-dns-wordlist.txt
+cp ~/Tools/Wordlists/_Sources/data/manual/raft-large-directories.txt ~/Tools/Wordlists/Directories/large.txt
+cp ~/Tools/Wordlists/_Sources/data/manual/raft-medium-directories.txt ~/Tools/Wordlists/Directories/medium.txt
+cp ~/Tools/Wordlists/_Sources/data/manual/raft-small-directories.txt ~/Tools/Wordlists/Directories/small.txt
+cp ~/Tools/Wordlists/_Sources/data/manual/raft-small-extensions.txt ~/Tools/Wordlists/Extensions/small.txt
+cp ~/Tools/Wordlists/_Sources/data/manual/raft-medium-extensions.txt ~/Tools/Wordlists/Extensions/medium.txt
+cp ~/Tools/Wordlists/_Sources/data/manual/raft-large-extensions.txt ~/Tools/Wordlists/Extensions/large.txt
+cp ~/Tools/Wordlists/_Sources/SecLists/Discovery/Web-Content/RobotsDisallowed-Top1000.txt ~/Tools/Wordlists/Directories/
+cp ~/Tools/Wordlists/_Sources/SecLists/Discovery/Web-Content/IIS.fuzz.txt ~/Tools/Wordlists/Technologies/
+cp ~/Tools/Wordlists/_Sources/SecLists/Discovery/Web-Content/diresearch.txt ~/Tools/Wordlists/Directories/
+cp ~/Tools/Wordlists/_Sources/SecLists/Discovery/Web-Content/default-web-root-directory-linux.txt ~/Tools/Wordlists/Directories/
+cp ~/Tools/Wordlists/_Sources/SecLists/Discovery/Web-Content/default-web-root-directory-windows.txt ~/Tools/Wordlists/Directories/
+cp ~/Tools/Wordlists/_Sources/SecLists/Discovery/Web-Content/nginx.txt ~/Tools/Wordlists/Technologies/
+cp ~/Tools/Wordlists/_Sources/SecLists/Discovery/Web-Content/api/* ~/Tools/Wordlists/APIs/
+cp ~/Tools/Wordlists/_Sources/SecLists/Fuzzing/XSS/* ~/Tools/Wordlists/Payloads/XSS/
+cp ~/Tools/Wordlists/_Sources/SecLists/Fuzzing/LFI/* ~/Tools/Wordlists/Payloads/LFI/
+cp ~/Tools/Wordlists/_Sources/SecLists/Fuzzing/XXE-Fuzzing.txt ~/Tools/Wordlists/Payloads/XXE/
+cp ~/Tools/Wordlists/_Sources/SecLists/Fuzzing/SQLi/* ~/Tools/Wordlists/Payloads/SQLi/
+cp ~/Tools/Wordlists/_Sources/SecLists/Fuzzing/Databases/sqli.auth.bypass.txt ~/Tools/Wordlists/Payloads/SQLi/
+cp ~/Tools/Wordlists/_Sources/SecLists/Fuzzing/extensions-most-common.fuzz.txt ~/Tools/Wordlists/Extensions/
+cd ~/Tools/Wordlists/_Sources/
+git clone https://gist.github.com/86a06c5dc309d08580a018c66354a056.git
+cp ~/Tools/Wordlists/_Sources/86a06c5dc309d08580a018c66354a056/all.txt ~/Tools/Wordlists/Subdomains/all.txt
+cd ~/Tools
+#KiteRunner
+echo "Installing KiteRunner"
+git clone https://github.com/assetnote/kiterunner.git
+cd kiterunner
+make build
+ln -s $(pwd)/dist/kr /usr/local/bin/kr
+curl https://wordlists-cdn.assetnote.io/data/kiterunner/routes-large.kite.tar.gz --output routes-large.kite.tar.gz
+tar xzf routes-large.kite.tar.gz routes-large.kite 
+mv routes-large.kite ~/Tools/Wordlists/APIs/
+rm routes-large.kite.tar.gz
+#path.ini
+echo $PATH > ~/Tools/path.ini
